@@ -29,7 +29,8 @@ $(document).ready(function () {
    
             if (shoot) {
                 $('#cannon-ball').css({ top: y, left: x });
-                //point=cannonball
+                point = $('#cannon-ball')
+                pointBound = document.getElementById('cannon-ball').getBoundingClientRect()
             } else {
                 point = $('#test-point').clone().appendTo('#container')
                 point.addClass('removable').css({ left: x.toFixed(1), top: y.toFixed(1) });
@@ -59,9 +60,8 @@ $(document).ready(function () {
      
         }
 
-  
-
     }
+    
     $(document).on('keydown', function move(k) {
 
         var pos = $('#end-point').position();
