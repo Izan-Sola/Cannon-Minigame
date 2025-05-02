@@ -1,19 +1,44 @@
 #start-point, #end-point {
-    top: 260px;
+    top: 340px;
     width: 12px;
     height: 12px;
     background-color: red;
     position: absolute;
 }
-
+#start-point {
+    top: 240;
+    left: 30px;
+    height: 20px;
+    
+}
 #test-point {
     position: absolute;
     background-color: black;
     width: 2px;
     height: 2px;
 }
+
+#collision-test {
+    position: absolute;
+    background-color: rgb(0, 162, 255);
+    top: 200px;
+    left: 400px;
+    width: 24px;
+    height: 8px;
+}
+#cannon-ball {
+    position: absolute;
+    background-color: black;
+    border-radius: 10px;
+    width: 6px;
+    height: 6px;
+}
 #end-point {
     left: 420px;
 }
 
-
+#container {
+    border: 6px double black;
+    height: 350px;
+    width: 750px;
+}
