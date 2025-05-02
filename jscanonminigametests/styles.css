@@ -1,0 +1,19 @@
+#start-point, #end-point {
+    top: 260px;
+    width: 12px;
+    height: 12px;
+    background-color: red;
+    position: absolute;
+}
+
+#test-point {
+    position: absolute;
+    background-color: black;
+    width: 2px;
+    height: 2px;
+}
+#end-point {
+    left: 420px;
+}
+
+
