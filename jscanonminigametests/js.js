@@ -21,8 +21,8 @@ $(document).ready(function () {
         // Draw the curve (e.g., using canvas or just logging points)
         for (let t = 0; t <= 1; t += 1 / steps) {
 
-            setTimeout(() => {
-                if(doBreak) return
+            setTimeout(() => { if(doBreak) return
+
             // Apply Bézier formula
             let x = Math.pow(1 - t, 2) * P0.x + 2 * (1 - t) * t * P1.x + Math.pow(t, 2) * P2.x;
             let y = Math.pow(1 - t, 2) * P0.y + 2 * (1 - t) * t * P1.y + Math.pow(t, 2) * P2.y;
@@ -37,11 +37,7 @@ $(document).ready(function () {
                 point.addClass(`${t}`)
                 pointBound = document.getElementsByClassName(t) 
                 pointBound = pointBound[0].getBoundingClientRect()
-             //   console.log(pointBound)
-            }
-         //   console.log($(a).position())
-    
-            
+            } 
          //console.log(`Point at t=${t.toFixed(2)}: (${x.toFixed(1)}, ${y.toFixed(1)})`);
        
         $('.collision-object').each(function (index, element) { 
@@ -53,12 +49,15 @@ $(document).ready(function () {
             if(horizontalCollision && verticalCollision) {
                 console.log('COLLISION POINT WITH OBJECT') 
                 doBreak = true
+                if(shoot) ballBounce($(element).attr(id))
             }
         });
         }, t * 400)
-
      
         }
+    }
+
+    function ballBounce(direction) {
 
     }
     
