@@ -18,13 +18,13 @@
     height: 2px;
 }
 
-#collision-test {
+#collision-right {
     position: absolute;
     background-color: rgb(0, 162, 255);
     top: 200px;
-    left: 400px;
-    width: 24px;
-    height: 8px;
+    left: 600px;
+    width: 12px;
+    height: 36px;
 }
 #cannon-ball {
     position: absolute;

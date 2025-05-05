@@ -13,7 +13,7 @@ $(document).ready(function () {
         // Control point (P₁) - adjust this to change the curve shape
         P1 = {
             x: (P0.x + P2.x) / 2,  // Midpoint X
-            y: (P0.y + P2.y) / 2 + -400  // Adjust Y for curvature
+            y: (P0.y + P2.y) / 2-400  // Adjust Y for curvature
         };
    // Number of points to draw (more points = smoother curve)
         steps = 60;
@@ -24,20 +24,8 @@ $(document).ready(function () {
             setTimeout(() => { if(doBreak) return
 
             // Apply Bézier formula
-            let x = Math.pow(1 - t, 2) * P0.x + 2 * (1 - t) * t * P1.x + Math.pow(t, 2) * P2.x;
-            let y = Math.pow(1 - t, 2) * P0.y + 2 * (1 - t) * t * P1.y + Math.pow(t, 2) * P2.y;
-   
-            if (shoot) {
-                $('#cannon-ball').css({ top: y, left: x });
-                point = $('#cannon-ball')
-                pointBound = document.getElementById('cannon-ball').getBoundingClientRect()
-            } else {
-                point = $('#test-point').clone().appendTo('#container')
-                point.addClass('removable').css({ left: x.toFixed(1), top: y.toFixed(1) });
-                point.addClass(`${t}`)
-                pointBound = document.getElementsByClassName(t) 
-                pointBound = pointBound[0].getBoundingClientRect()
-            } 
+            bezierCurve(P0, P1, t, shoot)
+
          //console.log(`Point at t=${t.toFixed(2)}: (${x.toFixed(1)}, ${y.toFixed(1)})`);
        
         $('.collision-object').each(function (index, element) { 
@@ -49,7 +37,7 @@ $(document).ready(function () {
             if(horizontalCollision && verticalCollision) {
                 console.log('COLLISION POINT WITH OBJECT') 
                 doBreak = true
-                if(shoot) ballBounce($(element).attr(id))
+                if(shoot) ballBounce(element)
             }
         });
         }, t * 400)
@@ -57,10 +45,51 @@ $(document).ready(function () {
         }
     }
 
-    function ballBounce(direction) {
-
+    function bezierCurve(P0, P1, t, shoot) {
+        //bezier formula
+        let x = Math.pow(1 - t, 2) * P0.x + 2 * (1 - t) * t * P1.x + Math.pow(t, 2) * P2.x;
+        let y = Math.pow(1 - t, 2) * P0.y + 2 * (1 - t) * t * P1.y + Math.pow(t, 2) * P2.y;
+              
+        if (shoot) {
+            $('#cannon-ball').css({ top: y, left: x });
+            point = $('#cannon-ball')
+            pointBound = document.getElementById('cannon-ball').getBoundingClientRect()
+        } else {
+            point = $('#test-point').clone().appendTo('#container')
+            point.addClass('removable').css({ left: x, top: y });
+            point.addClass(`${t}`)
+            pointBound = document.getElementsByClassName(t) 
+            pointBound = pointBound[0].getBoundingClientRect()
+        } 
+     //   return {x: x, y: y}
     }
+
+    function ballBounce(object) {
+
+        direction = $(object).attr('id').split('-')[1]
+        var position = $('#cannon-ball').position();
+        console.log(direction)
+
+        P0 = { x : position.left, y: position.top }
+        P2 = { x : (position.left/5), y: (position.top*2) }
+        P1 = {
+            x: (P0.x + P2.x) / 2,  // Midpoint X
+            y: (P0.y + P2.y) / 2-150  // Adjust Y for curvature
+        };
+       console.log(P2.x, P1.x)
     
+        switch (direction) {
+
+                case 'right': for (let t = 0; t <= 1; t += 1 / 60) {
+                    setTimeout(() => {
+                        bezierCurve(P0, P1, t, true);
+                        console.log('test');
+                    }, t * 400);     
+        }
+    }  
+}
+
+
     $(document).on('keydown', function move(k) {
 
         var pos = $('#end-point').position();
