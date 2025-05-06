@@ -1,0 +1,6 @@
+Summary: var vs let
+Feature			    var					                let
+Scope		 	    Function-scoped				        Block-scoped
+Hoisting	 	    Yes (initialized as undefined)		Yes (but not initialized)
+Redeclaration	 	Allowed within the same scope		Not allowed in the same block
+Closure behavior 	Shared across loop iterations		Unique per iteration 
