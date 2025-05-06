@@ -44,7 +44,7 @@ $(document).ready(function () {
             const verticalCollision = pointBound.bottom >= elementBound.top && pointBound.top <= elementBound.bottom
         
             if(horizontalCollision && verticalCollision) {
-                console.log('COLLISION POINT WITH OBJECT', element) 
+            //    console.log('COLLISION POINT WITH OBJECT', element) 
                 doBreak = true
                 if(bounceCount >= 3) {
                     bounceCount = 0

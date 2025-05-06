@@ -3,7 +3,17 @@ $(document).ready(function () {
     bounceCount = 0
     let curveTimeouts = []
   
-    function cancelCurve() {
+   $('.s').draggable({
+    axis: 'x, y',
+    cursor: 'crosshair',
+    containment: 'parent'
+   });
+   $('#collision-left').draggable({
+    axis: 'x, y',
+    cursor: 'crosshair',
+    containment: 'parent'
+   });
+    function clearTimeouts() {
         for (let id of curveTimeouts) clearTimeout(id)
         curveTimeouts = []
     }
@@ -24,20 +34,26 @@ $(document).ready(function () {
             x: (P0.x + P2.x) / 2,
             y: (P0.y + P2.y) / 2 - 400
         };
-
-        steps = 60;
-
+        
+        steps = 90+ getDistance($('#start-point'), $('#end-point'))/5
+        if(shoot) {
+            steps=steps*10
+           
+        }
         for (let t = 0; t <= 1; t += 1 / steps) {
+      
             let timeoutId = setTimeout(() => {
                 if (doBreak) return
                 bezierCurve(P0, P1, t)
-                checkCollisions()
+                ballPos = $('#cannon-ball').position()
+                P3 = { x: ballPos.left, y: ballPos.top }
+                checkCollisions(P1, P3)
             }, t * 600)
             curveTimeouts.push(timeoutId)
         }
     }
 
-    function checkCollisions() {
+    function checkCollisions(PeakP1, PeakP2) {
         $('.collision-object').each(function (index, element) {
             elementBound = element.getBoundingClientRect()
             const horizontalCollision = pointBound.right >= elementBound.left && pointBound.left <= elementBound.right
@@ -50,9 +66,11 @@ $(document).ready(function () {
                     bouncedElements.push(element) 
                     if(bouncedElements.length > 2) bouncedElements.shift()
                     if(bouncedElements.length == 2) distance = getDistance(bouncedElements[0], bouncedElements[1])
-                    cancelCurve()
+                    clearTimeouts()
                     bounceCount+=1
-                    ballBounce(element, distance)
+                    peakDistance = (Math.abs(PeakP1.y - PeakP2.y))
+                    console.log(peakDistance)
+                    ballBounce(element, distance, peakDistance)
                     // console.log('bounce here', element, bounceCount)
                       
                 }
@@ -67,9 +85,9 @@ $(document).ready(function () {
  
         distanceX = Math.abs(firstPos.left - secondPos.left)
         distanceY = Math.abs(firstPos.top - secondPos.top)
-
         distance = Math.sqrt(distanceX*distanceX + distanceY*distanceY)
-        console.log(distance)
+
+
         return distance
     }
 
@@ -90,36 +108,42 @@ $(document).ready(function () {
         }
     }
 
-    function ballBounce(object, distance) {
-    
+    function ballBounce(object, distance, peakDistance) {
+        console.log(peakDistance)
         rotation = Math.abs($(object).css('rotate').split('deg')[0])
-        bounceFactorX = ((distance/100)*1.5)
-        bounceFactorY = bounceFactorX*1.25
-        console.log(rotation, bounceFactorY)
+        bounceFactorX = rotation/10 - bounceCount
+        bounceFactorY = (peakDistance/200) / (bounceCount>1 ? bounceCount/2 : 1)
 
         direction = $(object).attr('id').split('-')[1]
         var position = $('#cannon-ball').position();
 
         P0 = { x: position.left, y: position.top }
+        if(bounceFactorX<1) bounceFactorX+=1
+        if(bounceFactorY<1) bounceFactorY+=1
+    
 
         switch (direction) {
-            case 'right':
-                
-              //  P2 = { x: (P0.x / (bounceFactorX+(rotation/10)))-bounceCount, y: (P0.y * (bounceFactorY/(rotation/25))) }; break
+            case 'right':          
+              P2 = { x: P0.x * bounceFactorX, y: P0.y / bounceFactorY }; break
             case 'left':
-             //   P2 = { x: (P0.x * (bounceFactorX+(rotation/10)))-bounceCount, y: (P0.y * (bounceFactorY/(rotation/25))) }; break
+              P2 = { x: P0.x / bounceFactorX, y: P0.y / bounceFactorY }; break
         }
-        //P2 = {x: P0.x , y:}
+
+    //    P2 = {x: P0.x / (bounceFactorX+(rotation/10)), y: P0.y * (bounceFactorY/(rotation/25))}
         P1 = {
             x: (P0.x + P2.x) / 2,
             y: (P0.y + P2.y) / 2 - 150
         };
-        step = 80*(bounceCount*2)
-        console.log(step+"steps")
-        for (let t = 0; t <= 1.25; t += 1 / step) {
+
+        console.log("BOUNCEFACTORY: "+bounceFactorY+ "  BOUNCEFACTORX: "+bounceFactorX)
+
+        if(bounceFactorX<1) reverseFactor = Math.abs(P0.x - P2.x)
+
+        step = 90*(bounceCount*2.75)+distance
+        for (let t = 0; t <= 2; t += 1 / step) {
             let timeoutId = setTimeout(() => {
                 bezierCurve(P0, P1, t)
-                checkCollisions()
+                checkCollisions(P1, P2)
             }, t * 600)
             curveTimeouts.push(timeoutId)
         }
@@ -129,7 +153,7 @@ $(document).ready(function () {
         var pos = $('#end-point').position();
         var top = pos.top;
         var left = pos.left;
-
+        clearTimeouts()
         $('.removable').each(function (index, element) { $(element).remove() });
 
         k.stopPropagation()
