@@ -1,2 +1,2 @@
 # Cannon-Minigame
-Making an actual effort to learn some math with this because what the FUCK is a bezier curve
+this started cuz i felt like trynna understand maths more by messing around with curves
