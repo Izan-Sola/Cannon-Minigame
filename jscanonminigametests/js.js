@@ -114,8 +114,8 @@ $(document).ready(function () {
 
     function ballBounce(object, distance, peakDistance) {
 
-        //if distanceY is negative, reduce X factor (second object is higher than first, less force on bounce))
-        rotation = $(object).css('rotate').split('deg')[0]
+    
+        rotation = Math.abs($(object).css('rotate').split('deg')[0])
         bounceFactorX =  1.1*(rotation/75) - (bounceCount/20)
         bounceFactorY = ( (peakDistance/200) / (bounceCount>1 ? bounceCount/2 : 1) ) - rotation/100
 
