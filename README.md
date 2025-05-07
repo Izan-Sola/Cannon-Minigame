@@ -1,2 +1,2 @@
-# Completely innacurate and hard-coded bouncing ball 
+# Completely inaccurate and hard-coded bouncing ball 
 I was bored in class
