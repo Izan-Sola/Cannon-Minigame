@@ -8,8 +8,7 @@
 #start-point {
     top: 240;
     left: 30px;
-    height: 20px;
-    
+    height: 20px;  
 }
 #test-point {
     position: absolute;
@@ -25,7 +24,7 @@
     left: 200px;
     width: 36px;
     height: 10px;
-    rotate: 75deg;
+    rotate: 1deg;  
 }
 .s {
     position: absolute;
@@ -42,7 +41,7 @@
     left: 100px;
     width: 36px;
     height: 12px;
-    rotate: -35deg;
+    rotate: -55deg;
 }
 #cannon-ball {
     position: absolute;
@@ -52,7 +51,7 @@
     height: 6px;
 }
 #end-point {
-    left: 420px;
+    left: 30px;
 }
 
 #container {
