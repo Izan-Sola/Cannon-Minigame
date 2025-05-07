@@ -1,68 +1,104 @@
 $(document).ready(function () {
+    shoot = false
+    bounceCount = 0
+    let curveTimeouts = []
+  
+    $('.collision-object').each(function (index, element) {
+        $(element).draggable({
+            axis: 'x, y',
+            cursor: 'crosshair',
+            containment: 'parent'
+           });
+    })
 
-})
+    $('#start-point').draggable({
+        axis: 'x, y',
+        cursor: 'crosshair',
+        containment: 'parent'
+       });
 
-    //*trynna learn some math lol
-   
-    
-    function drawCurvedLine(startPosition, endPosition) {
+    function clearTimeouts() {
+        for (let id of curveTimeouts) clearTimeout(id)
+        curveTimeouts = []
+    }
+
+    function drawCurvedLine() {
         bounceCount = 0
-        let doBreak = false
-        // Define points (P₀ = start, P₂ = end)
+        bouncedElements = []
+        
+        var startPosition = $('#start-point').position();
+        var endPosition = $('#end-point').position();
+        bouncedElements.push($('#start-point'))
+        doBreak = false
+
         P0 = { x: startPosition.left, y: startPosition.top };
         P2 = { x: endPosition.left, y: endPosition.top };
 
-        // Control point (P₁) - adjust this to change the curve shape
         P1 = {
-            x: (P0.x + P2.x) / 2,  // Midpoint X
-            y: (P0.y + P2.y) / 2-400  // Adjust Y for curvature
+            x: (P0.x + P2.x) / 2,
+            y: (P0.y + P2.y) / 2 - 400
         };
-   // Number of points to draw (more points = smoother curve)
-        steps = 60;
         
-        // Draw the curve (e.g., using canvas or just logging points)
+        steps = 90+ getDistance($('#start-point'), $('#end-point'))/5
+        if(shoot) {
+            steps=steps*10
+           
+        }
         for (let t = 0; t <= 1; t += 1 / steps) {
-
-            setTimeout(() => { if(doBreak) return
-
-            // Apply Bézier formula
-            bezierCurve(P0, P1, t, shoot)
-
-         //console.log(`Point at t=${t.toFixed(2)}: (${x.toFixed(1)}, ${y.toFixed(1)})`);
-             checkCollisions(shoot)
-
-        }, t * 600)
-     
+      
+            let timeoutId = setTimeout(() => {
+                if (doBreak) return
+                bezierCurve(P0, P1, t)
+                ballPos = $('#cannon-ball').position()
+                P3 = { x: ballPos.left, y: ballPos.top }
+                checkCollisions(P1, P3)
+            }, t * 600)
+            curveTimeouts.push(timeoutId)
         }
     }
 
-    function checkCollisions(shoot) {
-        $('.collision-object').each(function (index, element) { 
-           
+    function checkCollisions(PeakP1, PeakP2) {
+        $('.collision-object').each(function (index, element) {
             elementBound = element.getBoundingClientRect()
             const horizontalCollision = pointBound.right >= elementBound.left && pointBound.left <= elementBound.right
             const verticalCollision = pointBound.bottom >= elementBound.top && pointBound.top <= elementBound.bottom
-        
-            if(horizontalCollision && verticalCollision) {
-            //    console.log('COLLISION POINT WITH OBJECT', element) 
+
+            if (horizontalCollision && verticalCollision) {
                 doBreak = true
-                if(bounceCount >= 3) {
-                    bounceCount = 0
-                    return
-                }
-                if(shoot && bounceCount < 2) {
-                    ballBounce(element)
-                    bounceCount+=1         
+                
+                if (shoot && !bouncedElements.includes(element)) {
+                    bouncedElements.push(element) 
+                    if(bouncedElements.length > 2) bouncedElements.shift()
+                    if(bouncedElements.length == 2) distance = getDistance(bouncedElements[0], bouncedElements[1])
+                    clearTimeouts()
+                    bounceCount+=1
+                    peakDistance = (Math.abs(PeakP1.y - PeakP2.y))
+                    console.log(peakDistance)
+                    ballBounce(element, distance, peakDistance)
+                    // console.log('bounce here', element, bounceCount)
+                      
                 }
             }
         });
     }
 
-    function bezierCurve(P0, P1, t, shoot) {
-        //bezier formula
+    function getDistance(firstPoint, secondPoint) {
+
+        var firstPos = $(firstPoint).position();
+        var secondPos = $(secondPoint).position();
+ 
+        distanceX = Math.abs(firstPos.left - secondPos.left)
+        distanceY = Math.abs(firstPos.top - secondPos.top)
+        distance = Math.sqrt(distanceX*distanceX + distanceY*distanceY)
+
+
+        return distance
+    }
+
+    function bezierCurve(P0, P1, t) {
         let x = Math.pow(1 - t, 2) * P0.x + 2 * (1 - t) * t * P1.x + Math.pow(t, 2) * P2.x;
         let y = Math.pow(1 - t, 2) * P0.y + 2 * (1 - t) * t * P1.y + Math.pow(t, 2) * P2.y;
-              
+
         if (shoot) {
             $('#cannon-ball').css({ top: y, left: x });
             point = $('#cannon-ball')
@@ -71,67 +107,77 @@ $(document).ready(function () {
             point = $('#test-point').clone().appendTo('#container')
             point.addClass('removable').css({ left: x, top: y });
             point.addClass(`${t}`)
-            pointBound = document.getElementsByClassName(t) 
+            pointBound = document.getElementsByClassName(t)
             pointBound = pointBound[0].getBoundingClientRect()
-        } 
-     //   return {x: x, y: y}
-
-     
+        }
     }
 
-    function ballBounce(object) {
+    function ballBounce(object, distance, peakDistance) {
 
-    //     direction = $(object).attr('id').split('-')[1]
-    //     var position = $('#cannon-ball').position();
-    //     console.log(direction)
+        //if distanceY is negative, reduce X factor (second object is higher than first, less force on bounce))
+        rotation = $(object).css('rotate').split('deg')[0]
+        bounceFactorX =  1.1*(rotation/75) - (bounceCount/20)
+        bounceFactorY = ( (peakDistance/200) / (bounceCount>1 ? bounceCount/2 : 1) ) - rotation/100
 
-    //     P0 = { x : position.left, y: position.top }
-       
- 
-    //     switch (direction) {
-
-    //             case 'right':
-    //                 P2 = { x : (position.left/5), y: (position.top*2) }; break
-    //             case 'left':
-    //                 P2 = { x : (position.left*5), y: (position.top*2) }; break         
-    // }  
-
-    // P1 = {
-    //     x: (P0.x + P2.x) / 2,  // Midpoint X
-    //     y: (P0.y + P2.y) / 2-150  // Adjust Y for curvature
-    // };
-
-    for (let t = 0; t <= 1; t += 1 / 60) setTimeout(() =>  { 
-                                         drawCurvedLine($('#cannon-ball').position(), )
-                                         checkCollisions(true) }, t * 600);     
-    
-}
+        direction = $(object).attr('id').split('-')[1]
+        var position = $('#cannon-ball').position();
+        console.log("START POINT: "+P0.x + " | "+ P0.y)
+        P0 = { x: position.left, y: position.top }
+        if(bounceFactorX<1) bounceFactorX+=Math.abs(bounceFactorX)+1
+        
+        if(bounceFactorX<1.1) bounceFactorX+=(peakDistance/600)
+        if(bounceFactorY<1) bounceFactorY+=1
 
 
+        switch (direction) {
+            case 'right':          
+              P2 = { x: P0.x * bounceFactorX, y: P0.y / bounceFactorY }; break
+            case 'left':
+              P2 = { x: P0.x / bounceFactorX, y: P0.y / bounceFactorY }; break
+        }
 
-$(document).on('keydown', function move(k) {
+       //P2 = { x: P0.x / bounceFactorX, y: P0.y / bounceFactorY }; 
 
-    var pos = $('#end-point').position();
-    var top = pos.top;
-    var left = pos.left;
+        P1 = {
+            x: (P0.x + P2.x) / 2,
+            y: (P0.y + P2.y) / 2 - 150
+        };
 
-    $('.removable').each(function (index, element) { $(element).remove() });
-
-    k.stopPropagation()
-
-    switch(k.key) {
-        case 'w': $('#end-point').css('top', top-10); break
-        case 'a': $('#end-point').css('left', left-10); break
-        case 's': $('#end-point').css('top', top+10); break
-        case 'd': $('#end-point').css('left', left+10); break
-        case ' ': drawCurvedLine(true); break
+        console.log("BOUNCEFACTORX: "+bounceFactorX+ "  BOUNCEFACTORY: "+bounceFactorY)
+        console.log("END POINT: "+P2.x +" | "+ P2.y);
+      
+        step = 90*(bounceCount*2.75)+distance
+        for (let t = 0; t <= 2; t += 1 / step) {
+            let timeoutId = setTimeout(() => {
+                bezierCurve(P0, P1, t)
+                checkCollisions(P1, P2)
+            }, t * 600)
+            curveTimeouts.push(timeoutId)
+        }
     }
 
-    if(k.key !== ' ') drawCurvedLine($('#start-point').position(), $('#end-point').position());
-    
+    $(document).on('keydown', function move(k) {
+        var pos = $('#end-point').position();
+        var top = pos.top;
+        var left = pos.left;
+        clearTimeouts()
+        $('.removable').each(function (index, element) { $(element).remove() });
+
+        k.stopPropagation()
+
+        switch (k.key) {
+            case 'w': $('#end-point').css('top', top - 10); break
+            case 'a': $('#end-point').css('left', left - 10); break
+            case 's': $('#end-point').css('top', top + 10); break
+            case 'd': $('#end-point').css('left', left + 10); break
+            case ' ':
+                shoot = true
+                drawCurvedLine(); break
+        }
+
+        if (k.key !== ' ') {
+            shoot = false
+            drawCurvedLine();
+        }
+    })
 })
-
-
-//---------------------------------
-
-

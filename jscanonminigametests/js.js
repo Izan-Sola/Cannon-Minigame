@@ -11,6 +11,11 @@ $(document).ready(function () {
            });
     })
 
+    $('#start-point').draggable({
+        axis: 'x, y',
+        cursor: 'crosshair',
+        containment: 'parent'
+       });
 
     function clearTimeouts() {
         for (let id of curveTimeouts) clearTimeout(id)
@@ -110,7 +115,7 @@ $(document).ready(function () {
     function ballBounce(object, distance, peakDistance) {
 
         //if distanceY is negative, reduce X factor (second object is higher than first, less force on bounce))
-        rotation = Math.abs($(object).css('rotate').split('deg')[0])
+        rotation = $(object).css('rotate').split('deg')[0]
         bounceFactorX =  1.1*(rotation/75) - (bounceCount/20)
         bounceFactorY = ( (peakDistance/200) / (bounceCount>1 ? bounceCount/2 : 1) ) - rotation/100
 
@@ -118,8 +123,8 @@ $(document).ready(function () {
         var position = $('#cannon-ball').position();
         console.log("START POINT: "+P0.x + " | "+ P0.y)
         P0 = { x: position.left, y: position.top }
-        if(bounceFactorX<1) bounceFactorX+=Math.abs(bounceFactorX)+1
-        
+
+        if(bounceFactorX<1) bounceFactorX+=Math.abs(bounceFactorX)+1 
         if(bounceFactorX<1.1) bounceFactorX+=(peakDistance/600)
         if(bounceFactorY<1) bounceFactorY+=1
 
@@ -131,7 +136,8 @@ $(document).ready(function () {
               P2 = { x: P0.x / bounceFactorX, y: P0.y / bounceFactorY }; break
         }
 
-    //    P2 = {x: P0.x / (bounceFactorX+(rotation/10)), y: P0.y * (bounceFactorY/(rotation/25))}
+       //P2 = { x: P0.x / bounceFactorX, y: P0.y / bounceFactorY }; 
+
         P1 = {
             x: (P0.x + P2.x) / 2,
             y: (P0.y + P2.y) / 2 - 150
